@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# GYM Core — Frontend
 
-## Getting Started
+Next.js 14 frontend for the Gym Core Management System.
 
-First, run the development server:
+## Stack
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS (dark mode)
+- **Icons**: Lucide React
+- **HTTP**: Axios
+- **Auth**: React Context + localStorage JWT
+
+## Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Runs on **http://localhost:3000**
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Route | Description |
+|---|---|
+| `/` | Root — auto-redirects based on role |
+| `/login` | Login page |
+| `/admin` | Admin dashboard |
+| `/admin/users` | Users & Roles management |
+| `/admin/packages` | Packages & Billing |
+| `/admin/settings` | Global Settings |
+| `/reception` | Receptionist desk |
+| `/trainer` | Trainer portal |
+| `/member` | Member app |
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Auth Flow
+1. User submits credentials at `/login`
+2. JWT returned from backend is stored in `localStorage`
+3. `AuthContext` reads token on load and redirects to role-specific dashboard
+4. Protected routes check role before rendering — unauthorized users are redirected to `/login`
