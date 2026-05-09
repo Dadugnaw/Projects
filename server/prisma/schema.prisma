@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  password_hash String
+  role          Role      @default(MEMBER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberProfile  Member?
+  trainerProfile Trainer?
+}
+
+enum Role {
+  ADMIN
+  RECEPTIONIST
+  TRAINER
+  MEMBER
+}
+
+model Member {
+  id                String       @id @default(uuid())
+  userId            String       @unique
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  full_name         String
+  gender            String?
+  dob               DateTime?
+  phone             String?
+  email             String?      @unique
+  address           String?
+  emergency_contact String?
+  height            Float?
+  weight            Float?
+  join_date         DateTime     @default(now())
+  membership_status Status       @default(ACTIVE)
+  
+  memberships       Membership[]
+  payments          Payment[]
+  attendances       Attendance[]
+  workoutPlans      WorkoutPlan[]
+  nutritionPlans    NutritionPlan[]
+  classBookings     ClassBooking[]
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+}
+
+model Trainer {
+  id             String         @id @default(uuid())
+  userId         String         @unique
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization String?
+  
+  workoutPlans   WorkoutPlan[]
+  nutritionPlans NutritionPlan[]
+  classes        Class[]
+}
+
+model Membership {
+  id           String   @id @default(uuid())
+  memberId     String
+  packageId    String
+  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  package      Package  @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  start_date   DateTime
+  expiry_date  DateTime
+  createdAt    DateTime @default(now())
+}
+
+model Package {
+  id            String   @id @default(uuid())
+  name          String
+  duration_days Int
+  price         Float
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  
+  memberships   Membership[]
+}
+
+model Payment {
+  id           String   @id @default(uuid())
+  memberId     String
+  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amount       Float
+  payment_date DateTime @default(now())
+  method       PaymentMethod
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  MOBILE_BANKING
+  WALLET
+}
+
+model Attendance {
+  id           String   @id @default(uuid())
+  memberId     String
+  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  checkin_time DateTime @default(now())
+}
+
+model WorkoutPlan {
+  id          String   @id @default(uuid())
+  memberId    String
+  trainerId   String
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  trainer     Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  days_data   Json     // Storing day-by-day workout as JSON
+  createdAt   DateTime @default(now())
+}
+
+model NutritionPlan {
+  id          String   @id @default(uuid())
+  memberId    String
+  trainerId   String
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  trainer     Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  title       String
+  meals_data  Json     // Storing meal plan details as JSON
+  createdAt   DateTime @default(now())
+}
+
+model Class {
+  id          String   @id @default(uuid())
+  trainerId   String
+  trainer     Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  schedule    DateTime
+  capacity    Int
+  
+  bookings    ClassBooking[]
+}
+
+model ClassBooking {
+  id          String   @id @default(uuid())
+  memberId    String
+  classId     String
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  gymClass    Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  status      BookingStatus @default(CONFIRMED)
+  createdAt   DateTime @default(now())
+}
+
+enum BookingStatus {
+  CONFIRMED
+  WAITLISTED
+  CANCELLED
+}
+
+model Branch {
+  id          String   @id @default(uuid())
+  name        String
+  location    String
+  contact     String?
+}
+
+model Settings {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+}
